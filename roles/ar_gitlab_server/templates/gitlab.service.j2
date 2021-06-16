@@ -1,0 +1,25 @@
+[Unit]
+Description={{ ar_gitlab_server_container_name }}
+Wants=network.target
+After=network-online.target
+
+[Service]
+{% if ar_gitlab_server_network_http_proxy %}
+Environment=HTTP_PROXY="{{ ar_gitlab_server_network_http_proxy }}"
+{% endif %}
+{% if ar_gitlab_server_network_https_proxy %}
+Environment=HTTPS_PROXY="{{ ar_gitlab_server_network_https_proxy }}"
+{% endif %}
+{% if ar_gitlab_server_network_http_proxy %}
+Environment=NO_PROXY="{{ ar_gitlab_server_network_http_proxy }}"
+{% endif %}
+Restart=on-failure
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStart=/usr/bin/podman run --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid --name={{ ar_gitlab_server_container_name }}  -v {{ ar_gitlab_server_base_dir }}/config:/etc/gitlab:Z -v {{ ar_gitlab_server_base_dir }}/logs:/var/log/gitlab:Z -v {{ ar_gitlab_server_base_dir }}/data:/var/opt/gitlab:Z --log-driver=journald -p {{ ar_gitlab_server_container_port }}:{{ ar_gitlab_server_container_port }} -e GITLAB_OMNIBUS_CONFIG="external_url '{{ ar_gitlab_server_network_external_url }}'" -d {{ ar_gitlab_server_container_image }}:{{ ar_gitlab_server_container_image_tag }}
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target default.target

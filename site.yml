@@ -1,0 +1,5 @@
+---
+- name: Configure system to run a gitlab server via podman
+  hosts: all
+  roles:
+    - role: ar_gitlab_server

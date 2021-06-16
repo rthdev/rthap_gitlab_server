@@ -1,0 +1,13 @@
+---
+# defaults file for ar_gitlab_server
+
+ar_gitlab_server_network_http_proxy:
+ar_gitlab_server_network_https_proxy:
+ar_gitlab_server_network_no_proxy:
+ar_gitlab_server_hostname: localhost
+ar_gitlab_server_container_port: 8080
+ar_gitlab_server_network_external_url: http://{{ ar_gitlab_server_hostname }}:{{ ar_gitlab_server_container_port }}
+ar_gitlab_server_container_name: gitlab
+ar_gitlab_server_container_image: gitlab/gitlab-ce
+ar_gitlab_server_container_image_tag: latest
+ar_gitlab_server_base_dir: /opt/gitlab

@@ -1,0 +1,7 @@
+---
+# vars file for ar_gitlab_server
+ar_systemd_podman_packages:
+  - podman
+  - podman-docker
+  - python3-pip
+

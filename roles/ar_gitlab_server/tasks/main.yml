@@ -1,0 +1,51 @@
+---
+# tasks file for ar_gitlab_server
+
+- block:
+  - name: Install Podman and pip
+    package:
+      name: "{{ ar_systemd_podman_packages }}"
+      state: present
+
+  - name: "Create container directories"
+    file:
+      state: directory
+      path: "{{ item }}"
+      mode: 0750
+    loop:
+      - "{{ ar_gitlab_server_base_dir }}/config"
+      - "{{ ar_gitlab_server_base_dir }}/logs"
+      - "{{ ar_gitlab_server_base_dir }}/data"
+
+  - name: Copy systemd file
+    template:
+      src: gitlab.service.j2
+      dest: /etc/systemd/system/gitlab.service
+      owner: root
+      group: root
+      mode: 0644
+    register: systemd_svc
+
+  - name: Restart {{ ar_gitlab_server_container_name }} service
+    systemd:
+      name: "{{ ar_gitlab_server_container_name }}.service"
+      daemon_reload: yes
+      enabled: yes
+      state: restarted
+    when: systemd_svc.changed | bool
+
+  - name: Start {{ ar_gitlab_server_container_name }} service
+    systemd:
+      name: "{{ ar_gitlab_server_container_name }}.service"
+      daemon_reload: yes
+      enabled: yes
+      state: started
+
+  - name: Wait for {{ ar_gitlab_server_container_name }} to be started locally
+    wait_for:
+      host: "{{ inventory_hostname }}"
+      port: "{{ ar_gitlab_server_container_port }}"
+      sleep: 1
+      timeout: 300
+
+  become: true
